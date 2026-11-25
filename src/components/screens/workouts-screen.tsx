@@ -13,6 +13,7 @@ import { formatDateShort, formatDecimal, formatDelta, formatInt } from "@/lib/fo
 import { cn } from "@/lib/cn";
 import { estimateWorkoutMinutes, getTrainingOverview, totalPlannedSets, workoutMuscles, type TrainingOverview } from "@/services/insights";
 import type { WorkoutSession, WorkoutWithExercises } from "@/types/domain";
+import { routes } from "@/lib/routes";
 
 export function WorkoutsScreen() {
   const today = useToday();
@@ -78,7 +79,7 @@ function Workouts({ today }: { today: string }) {
             <LabelCaps className="text-lime">Séance {o.activeSession.status === "paused" ? "en pause" : "en cours"}</LabelCaps>
             <p className="truncate text-headline-sm text-ink-strong uppercase">{o.activeSession.workoutName}</p>
           </div>
-          <ButtonLink href={`/session/${o.activeSession.id}`} size="md" icon={<Play className="size-4 fill-current" />}>
+          <ButtonLink href={routes.session(o.activeSession.id)} size="md" icon={<Play className="size-4 fill-current" />}>
             Reprendre
           </ButtonLink>
         </Card>
@@ -191,7 +192,7 @@ function WorkoutCard({
               )}
             </div>
             <h3 className="text-headline-md text-ink-strong uppercase">
-              <Link href={`/workouts/${workout.id}`} className="after:absolute after:inset-0 hover:text-lime">
+              <Link href={routes.workout(workout.id)} className="after:absolute after:inset-0 hover:text-lime">
                 {workout.name}
                 {day && <span className="text-muted"> — {WEEKDAY_LONG[day]}</span>}
               </Link>

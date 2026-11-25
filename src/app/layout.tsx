@@ -20,6 +20,7 @@ export const metadata: Metadata = {
   description:
     "Planification, suivi des séances, nutrition et progression sur un programme de 12 semaines.",
   applicationName: "WORKOUT",
+  manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: "WORKOUT", statusBarStyle: "black-translucent" },
 };
 

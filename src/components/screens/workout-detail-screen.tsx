@@ -14,6 +14,7 @@ import { formatTarget } from "@/lib/domain/training";
 import { formatClock, formatDateShort, formatInt } from "@/lib/format";
 import { estimateWorkoutMinutes, totalPlannedSets, workoutMuscles } from "@/services/insights";
 import type { BodyView, MuscleId } from "@/types/domain";
+import { routes } from "@/lib/routes";
 
 export function WorkoutDetailScreen({ id }: { id: string }) {
   const router = useRouter();
@@ -27,7 +28,7 @@ export function WorkoutDetailScreen({ id }: { id: string }) {
   const duplicate = useMutation((s) => s.workouts.duplicateWorkout(id), {
     onSuccess: (w) => {
       toast("Entraînement dupliqué");
-      router.push(`/workouts/${w.id}`);
+      router.push(routes.workout(w.id));
     },
   });
   const remove = useMutation((s) => s.workouts.deleteWorkout(id), {
@@ -76,7 +77,7 @@ export function WorkoutDetailScreen({ id }: { id: string }) {
             <ol className="divide-y divide-line">
               {w.exercises.map((e, i) => (
                 <li key={e.id}>
-                  <Link href={`/exercises/${e.exerciseId}`} className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-surface-2">
+                  <Link href={routes.exercise(e.exerciseId)} className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-surface-2">
                     <span className="font-display text-[18px] font-bold text-lime tabular">{i + 1}</span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-[15px] font-semibold text-ink-strong">{e.exercise.name}</span>
@@ -97,12 +98,12 @@ export function WorkoutDetailScreen({ id }: { id: string }) {
             {busy ? "Une séance est déjà en cours" : `Démarrer ${w.name}`}
           </Button>
           {busy && active.data && (
-            <ButtonLink href={`/session/${active.data.id}`} variant="secondary" block>
+            <ButtonLink href={routes.session(active.data.id)} variant="secondary" block>
               Reprendre la séance en cours
             </ButtonLink>
           )}
           <div className="grid grid-cols-3 gap-3">
-            <ButtonLink href={`/workouts/${w.id}/edit`} variant="secondary" icon={<Pencil className="size-4" />}>
+            <ButtonLink href={routes.workoutEdit(w.id)} variant="secondary" icon={<Pencil className="size-4" />}>
               Modifier
             </ButtonLink>
             <Button variant="secondary" icon={<Copy className="size-4" />} loading={duplicate.pending} onClick={() => void duplicate.run()}>

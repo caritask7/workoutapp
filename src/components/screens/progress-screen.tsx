@@ -49,6 +49,7 @@ import { formatDayMonth, formatDecimal, formatDelta, formatInt, formatKg } from 
 import { cn } from "@/lib/cn";
 import type { Services } from "@/services";
 import type { BodyMeasurement, PersonalRecord, ProgressPhoto, WorkoutSession } from "@/types/domain";
+import { routes } from "@/lib/routes";
 
 type Period = "7d" | "30d" | "3m" | "6m" | "1y";
 const PERIOD_DAYS: Record<Period, number> = { "7d": 7, "30d": 30, "3m": 91, "6m": 182, "1y": 365 };
@@ -302,7 +303,7 @@ function RecordsGrid({ records, names }: { records: PersonalRecord[]; names: Map
     <ul className="grid grid-cols-2 gap-3 md:grid-cols-3">
       {rows.map(({ exerciseId, top, previous }) => (
         <li key={exerciseId}>
-          <Link href={`/exercises/${exerciseId}`} className="block h-full rounded-card border border-line/70 bg-surface-2 p-3.5 transition-colors hover:border-lime/50">
+          <Link href={routes.exercise(exerciseId)} className="block h-full rounded-card border border-line/70 bg-surface-2 p-3.5 transition-colors hover:border-lime/50">
             <div className="mb-2 flex items-center justify-between gap-2">
               <span className="truncate text-label-caps text-muted">{names.get(exerciseId) ?? exerciseId}</span>
               <Pill tone="lime" className="h-5 px-2">
@@ -359,7 +360,7 @@ function LoadProgression({ sessions, names, from }: { sessions: WorkoutSession[]
           Au moins deux séances sur la période sont nécessaires pour tracer la courbe.
         </p>
       )}
-      <Link href={`/exercises/${selected}`} className="mt-3 inline-flex items-center gap-1 text-[13px] text-lime hover:underline">
+      <Link href={routes.exercise(selected)} className="mt-3 inline-flex items-center gap-1 text-[13px] text-lime hover:underline">
         Fiche et historique complet <ChevronRight className="size-3.5" aria-hidden />
       </Link>
     </Card>

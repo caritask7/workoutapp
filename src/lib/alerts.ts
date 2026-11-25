@@ -2,8 +2,14 @@
 let ctx: AudioContext | null = null;
 
 export function restFinishedAlert({ sound, vibration }: { sound: boolean; vibration: boolean }) {
-  if (vibration && typeof navigator !== "undefined" && "vibrate" in navigator) {
-    navigator.vibrate([180, 90, 180]);
+  if (vibration) {
+    // App iOS : retour haptique natif ; navigateur : Vibration API si disponible.
+    void import("./native")
+      .then(({ nativeRestHaptic }) => nativeRestHaptic())
+      .then((handled) => {
+        if (!handled && typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate([180, 90, 180]);
+      })
+      .catch(() => undefined);
   }
   if (!sound || typeof window === "undefined") return;
   try {

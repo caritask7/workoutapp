@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Fichiers générés : export statique et projet iOS Capacitor.
+    "ios/**",
+    "resources/**",
   ]),
 ]);
 

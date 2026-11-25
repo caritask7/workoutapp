@@ -79,7 +79,7 @@ function Avatar() {
 function TopBar() {
   const { mode } = useDataContext();
   return (
-    <header className="sticky top-0 z-30 border-b border-line/60 glass-bar">
+    <header className="safe-top sticky top-0 z-30 border-b border-line/60 glass-bar">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-3 px-4 md:px-8">
         <Link href="/" className="flex min-w-0 items-center gap-3 lg:hidden" aria-label="Accueil WORKOUT">
           <Logo />
@@ -134,7 +134,7 @@ function BottomNav({ pathname }: { pathname: string | null }) {
 
 function SideNav({ pathname }: { pathname: string | null }) {
   return (
-    <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-line bg-surface-lowest/60 px-4 py-6 lg:flex">
+    <aside className="safe-top sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-line bg-surface-lowest/60 px-4 py-6 lg:flex">
       <Link href="/" className="mb-10 px-2" aria-label="Accueil WORKOUT">
         <Logo />
       </Link>

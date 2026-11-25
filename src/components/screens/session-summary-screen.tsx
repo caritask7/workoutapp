@@ -8,6 +8,7 @@ import { formatDateLong, formatDecimal, formatDuration, formatInt } from "@/lib/
 import { totalVolume } from "@/lib/domain/training";
 import type { Services } from "@/services";
 import type { RecordType } from "@/types/domain";
+import { routes } from "@/lib/routes";
 
 const RECORD_LABEL: Record<RecordType, string> = {
   max_weight: "Charge max",
@@ -35,7 +36,7 @@ export function SessionSummaryScreen({ id }: { id: string }) {
     return (
       <div className="flex flex-col items-center gap-4">
         <ErrorState message="Cette séance n'est pas encore terminée." />
-        <ButtonLink href={`/session/${id}`}>Reprendre la séance</ButtonLink>
+        <ButtonLink href={routes.session(id)}>Reprendre la séance</ButtonLink>
       </div>
     );
   }

@@ -23,6 +23,7 @@ import {
   totalPlannedSets,
   workoutMuscles,
 } from "@/services/insights";
+import { routes } from "@/lib/routes";
 
 const GOAL_LABEL = {
   muscle_gain: "Phase prise de masse",
@@ -108,7 +109,7 @@ function Dashboard({ today }: { today: string }) {
               </div>
               <h2 className="text-headline-lg text-ink-strong uppercase">{o.activeSession.workoutName}</h2>
               <p className="mt-1 mb-6 text-[14px] text-muted">Votre séance est enregistrée au fur et à mesure : reprenez là où vous vous êtes arrêté.</p>
-              <ButtonLink href={`/session/${o.activeSession.id}`} size="lg" block className="mt-auto" icon={<RotateCcw className="size-5" />}>
+              <ButtonLink href={routes.session(o.activeSession.id)} size="lg" block className="mt-auto" icon={<RotateCcw className="size-5" />}>
                 Reprendre la séance
               </ButtonLink>
             </>
@@ -144,7 +145,7 @@ function Dashboard({ today }: { today: string }) {
                 <Button size="lg" block loading={pending} icon={<Play className="size-5 fill-current" />} onClick={() => void start(next.id)}>
                   Commencer la séance
                 </Button>
-                <Link href={`/workouts/${next.id}`} className="self-center text-[13px] text-muted underline-offset-4 hover:text-ink-strong hover:underline">
+                <Link href={routes.workout(next.id)} className="self-center text-[13px] text-muted underline-offset-4 hover:text-ink-strong hover:underline">
                   Voir le détail de la séance
                 </Link>
               </div>
@@ -168,7 +169,7 @@ function Dashboard({ today }: { today: string }) {
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         {/* Dernier record */}
         {record ? (
-          <Link href={`/exercises/${record.record.exerciseId}`} className="group">
+          <Link href={routes.exercise(record.record.exerciseId)} className="group">
             <Card className="flex items-center gap-4 transition-colors group-hover:border-lime/50">
               <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-lime/12 text-lime">
                 <Award className="size-7" aria-hidden />

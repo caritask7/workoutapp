@@ -11,6 +11,7 @@ import { sessionDensity, targetsFor } from "@/lib/domain/builder";
 import { fieldErrors, workoutSchema, type WorkoutExerciseInput, type WorkoutInput } from "@/lib/validation/schemas";
 import { formatClock } from "@/lib/format";
 import type { ExerciseWithMuscles } from "@/types/domain";
+import { routes } from "@/lib/routes";
 
 const REST_OPTIONS = [30, 45, 60, 75, 90, 105, 120, 150, 180, 240, 300];
 
@@ -36,7 +37,7 @@ export function WorkoutEditor({
   const save = useMutation((s, input: WorkoutInput) => s.workouts.saveWorkout(input, workoutId), {
     onSuccess: (w) => {
       toast(workoutId ? "Entraînement mis à jour" : "Entraînement créé");
-      router.push(`/workouts/${w.id}`);
+      router.push(routes.workout(w.id));
     },
   });
 

@@ -18,6 +18,7 @@ import { isoDateOf } from "@/lib/domain/dates";
 import { formatClock, formatDateShort, formatDecimal, formatInt } from "@/lib/format";
 import type { Services } from "@/services";
 import type { BodyView, RecordType } from "@/types/domain";
+import { routes } from "@/lib/routes";
 
 async function loadExercise(s: Services, id: string) {
   const exercise = await s.catalog.getExercise(id);
@@ -100,7 +101,7 @@ export function ExerciseDetailScreen({ id }: { id: string }) {
               <ul className="flex flex-col gap-2.5">
                 {usage.map(({ workout, item }) => (
                   <li key={item.id} className="flex items-center justify-between gap-3 text-[14px]">
-                    <Link href={`/workouts/${workout.id}`} className="truncate text-ink-strong hover:text-lime">
+                    <Link href={routes.workout(workout.id)} className="truncate text-ink-strong hover:text-lime">
                       {workout.name}
                     </Link>
                     <span className="shrink-0 text-muted tabular">

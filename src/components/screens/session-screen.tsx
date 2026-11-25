@@ -34,6 +34,7 @@ import { primeAudio, restFinishedAlert } from "@/lib/alerts";
 import { cn } from "@/lib/cn";
 import type { Services } from "@/services";
 import type { ExerciseWithMuscles, WorkoutSet } from "@/types/domain";
+import { routes } from "@/lib/routes";
 
 async function loadSession(s: Services, id: string) {
   const session = await s.sessions.getSession(id);
@@ -66,7 +67,7 @@ export function SessionScreen({ id }: { id: string }) {
 
   const act = useMutation(async (s, fn: (s: Services) => Promise<unknown>) => fn(s));
   const finish = useMutation((s) => s.sessions.finishSession(id), {
-    onSuccess: () => router.replace(`/session/${id}/summary`),
+    onSuccess: () => router.replace(routes.sessionSummary(id)),
   });
   const discard = useMutation((s) => s.sessions.discardSession(id), {
     onSuccess: () => {
@@ -89,7 +90,7 @@ export function SessionScreen({ id }: { id: string }) {
   }, [remaining, restEndsAt, data?.preferences, act, id]);
 
   useEffect(() => {
-    if (session?.status === "completed") router.replace(`/session/${id}/summary`);
+    if (session?.status === "completed") router.replace(routes.sessionSummary(id));
   }, [session?.status, id, router]);
 
   if (state.loading) return <div className="p-4"><PageSkeleton blocks={3} /></div>;
@@ -154,7 +155,7 @@ export function SessionScreen({ id }: { id: string }) {
   return (
     <div className="flex min-h-dvh flex-col">
       {/* Barre supérieure */}
-      <header className="sticky top-0 z-30 border-b border-line/60 glass-bar">
+      <header className="safe-top sticky top-0 z-30 border-b border-line/60 glass-bar">
         <div className="flex h-16 items-center gap-3 px-4">
           <IconButton label="Quitter le mode entraînement (la séance reste enregistrée)" variant="ghost" onClick={() => router.push("/workouts")}>
             <ArrowLeft className="size-5" />
@@ -381,7 +382,7 @@ export function SessionScreen({ id }: { id: string }) {
       {/* Options */}
       <Sheet open={menu} onClose={() => setMenu(false)} title={item.exerciseName}>
         <div className="flex flex-col gap-2">
-          <Link href={`/exercises/${item.exerciseId}`} className="flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-surface-3" onClick={() => setMenu(false)}>
+          <Link href={routes.exercise(item.exerciseId)} className="flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-surface-3" onClick={() => setMenu(false)}>
             <Info className="size-5 text-lime" aria-hidden /> Fiche de l&apos;exercice
           </Link>
           <button type="button" className="flex items-center gap-3 rounded-xl px-3 py-3 text-left hover:bg-surface-3" onClick={() => { setMenu(false); setHistoryOpen(true); }}>

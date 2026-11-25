@@ -10,6 +10,7 @@ import { useData } from "@/hooks/use-data";
 import { suggestWorkout } from "@/lib/domain/builder";
 import { MUSCLE_BY_ID } from "@/data/seed/muscles";
 import { MUSCLE_IDS, type MuscleId } from "@/types/domain";
+import { routes } from "@/lib/routes";
 
 function BackLink({ href, label }: { href: string; label: string }) {
   return (
@@ -61,7 +62,7 @@ export function EditWorkoutScreen({ id }: { id: string }) {
   const w = workout.data;
   return (
     <div className="flex flex-col gap-5">
-      <BackLink href={`/workouts/${id}`} label={w.name} />
+      <BackLink href={routes.workout(id)} label={w.name} />
       <PageHeader eyebrow="Modifier l'entraînement" title={w.name} />
       <WorkoutEditor
         workoutId={id}

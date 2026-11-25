@@ -11,15 +11,19 @@ Application personnelle de musculation : programme de 12 semaines (Full Body A/B
 | `/` | Tableau de bord : poids cible, semaine, prochaine séance, dernier record, nutrition |
 | `/workouts` | Programme 12 semaines, séances de la semaine, entraînements personnalisés, tonnage |
 | `/workouts/muscles` | Ciblage anatomique (SVG face / dos) → séance proposée |
-| `/workouts/new`, `/workouts/[id]`, `/workouts/[id]/edit` | Création, détail, modification d'un entraînement |
-| `/session/[id]` | Mode entraînement : séries, repos automatique, pause / reprise |
-| `/session/[id]/summary` | Récapitulatif de séance et records battus |
-| `/exercises/[id]` | Fiche exercice : exécution, muscles, consignes, historique des charges |
+| `/workouts/new`, `/workouts/detail?id=…`, `/workouts/edit?id=…` | Création, détail, modification d'un entraînement |
+| `/session?id=…` | Mode entraînement : séries, repos automatique, pause / reprise |
+| `/session/summary?id=…` | Récapitulatif de séance et records battus |
+| `/exercises/detail?id=…` | Fiche exercice : exécution, muscles, consignes, historique des charges |
 | `/progress`, `/progress/history` | Poids, volume, records, charges, mensurations, photos, historique |
 | `/nutrition` | Journal des repas, macros, aliments, objectifs |
 | `/profile` | Profil, jours d'entraînement, préférences, données |
 | `/login`, `/signup` | Authentification (mode Supabase uniquement) |
 | `/design-system` | Référence des composants (outil de développement) |
+
+## iPhone (app native, sans App Store)
+
+L'application est une app iOS **Capacitor** : l'export statique est embarqué et fonctionne hors ligne. Guide pas à pas : **[`docs/IPHONE.md`](docs/IPHONE.md)**. Il faut un Mac avec Xcode et un Apple ID.
 
 ## Démarrage
 
@@ -35,13 +39,16 @@ Sans configuration, l'application tourne en **mode démo** : les données sont s
 1. Créer un projet Supabase et appliquer les migrations de `supabase/migrations/` (`supabase db push`, ou les coller dans l'éditeur SQL).
 2. Copier `.env.example` vers `.env.local` et renseigner l'URL et la clé publique du projet.
 
-Chaque table utilisateur est protégée par RLS. Les photos de progression sont stockées dans le bucket privé `progress-photos`.
+Chaque table utilisateur est protégée par RLS. L'application étant entièrement statique (sans serveur), la redirection vers `/login` se fait côté client ; la sécurité des données repose sur les politiques RLS de PostgreSQL. Dans Supabase → Authentication → URL Configuration, ajoutez `https://votre-domaine/auth/callback/` aux Redirect URLs. Les photos de progression sont stockées dans le bucket privé `progress-photos`.
 
 ## Scripts
 
 | Commande | Rôle |
 |---|---|
-| `npm run dev` / `build` / `start` | Next.js |
+| `npm run dev` | Serveur de développement |
+| `npm run build` | Export statique dans `out/` (hébergeable sur n'importe quel serveur de fichiers) |
+| `npm run ios:sync` | Build + copie dans le projet iOS (`ios/`) |
+| `npm run ios:open` | Ouvre le projet dans Xcode (sur Mac) |
 | `npm run typecheck` | Types des routes + `tsc` |
 | `npm run lint` | ESLint |
 | `npm test` | Vitest (calculs métier + services sur IndexedDB) |
@@ -71,7 +78,8 @@ L'application est installable (manifeste PWA) : ouvrez-la dans le navigateur du 
 ## Architecture
 
 ```
-src/app/(app)/        routes (App Router), coquille + navigation
+src/app/(app)/        routes (App Router, export statique), coquille + navigation
+ios/                  projet Xcode (Capacitor)
 src/components/ui/    design system « Kinetic Obsidian » (DESIGN.md)
 src/lib/domain/       calculs purs (volume, 1RM, macros, semaines)
 src/lib/validation/   schémas Zod

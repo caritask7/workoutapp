@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { Button, Card, Field, InlineError, Input, Logo } from "@/components/ui";
 import { fieldErrors } from "@/lib/validation/schemas";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 const loginSchema = z.object({
   email: z.email("Adresse e-mail invalide."),
@@ -27,6 +28,19 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const [pending, setPending] = useState(false);
   const next = params.get("next");
   const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
+
+  // Mode démo : pas de compte. Session déjà ouverte : inutile de se reconnecter.
+  useEffect(() => {
+    if (!isSupabaseConfigured) {
+      router.replace("/");
+      return;
+    }
+    void getSupabaseBrowserClient()
+      .auth.getUser()
+      .then(({ data }) => {
+        if (data.user) router.replace(safeNext);
+      });
+  }, [router, safeNext]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +82,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   };
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-6 px-4 py-10">
+    <main className="safe-top mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-6 px-4 py-10">
       <Logo className="self-center" />
       <Card>
         <h1 className="text-headline-lg text-ink-strong">{mode === "login" ? "Connexion" : "Créer un compte"}</h1>

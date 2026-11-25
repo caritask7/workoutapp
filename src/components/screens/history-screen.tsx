@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { useData, useMutation } from "@/hooks/use-data";
 import { formatDateShort, formatDuration, formatInt } from "@/lib/format";
 import type { WorkoutSession } from "@/types/domain";
+import { routes } from "@/lib/routes";
 
 /** Historique des séances terminées (suppression avec recalcul des records). */
 export function HistoryScreen() {
@@ -50,7 +51,7 @@ export function HistoryScreen() {
               <ul className="divide-y divide-line">
                 {list.map((s) => (
                   <li key={s.id} className="flex items-center gap-2 pr-3">
-                    <Link href={`/session/${s.id}/summary`} className="flex min-w-0 flex-1 items-center gap-3 px-5 py-3.5 hover:bg-surface-2">
+                    <Link href={routes.sessionSummary(s.id)} className="flex min-w-0 flex-1 items-center gap-3 px-5 py-3.5 hover:bg-surface-2">
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-[15px] font-semibold text-ink-strong uppercase">{s.workoutName}</span>
                         <span className="block text-[13px] text-muted tabular">

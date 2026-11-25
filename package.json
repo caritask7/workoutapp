@@ -12,9 +12,18 @@
     "test:watch": "vitest",
     "db:seed-sql": "tsx scripts/generate-seed-sql.ts",
     "format": "prettier --write .",
-    "foods:import": "tsx scripts/import-foods.ts"
+    "foods:import": "tsx scripts/import-foods.ts",
+    "ios:sync": "next build && cap sync ios",
+    "ios:open": "cap open ios"
   },
   "dependencies": {
+    "@capacitor/core": "^8.6.2",
+    "@capacitor/filesystem": "^8.1.5",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/ios": "^8.6.2",
+    "@capacitor/share": "^8.0.3",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.4",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.119.2",
     "idb": "^8.0.4",
@@ -23,10 +32,11 @@
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "recharts": "^3.11.1",
-    "server-only": "^0.0.1",
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@capacitor/assets": "^4.0.0",
+    "@capacitor/cli": "^8.6.2",
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "^22.20.7",
     "@types/react": "^19",

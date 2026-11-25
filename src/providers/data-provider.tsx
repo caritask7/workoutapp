@@ -31,6 +31,9 @@ interface DataContextValue {
 
 const DataContext = createContext<DataContextValue | null>(null);
 
+/** Mode Supabase sans session : redirection vers la connexion. */
+class NotAuthenticated extends Error {}
+
 let localDriver: LocalDriver | null = null;
 const getLocalDriver = () => (localDriver ??= new LocalDriver());
 
@@ -46,7 +49,7 @@ async function connect(): Promise<{ driver: DataDriver; userId: string; email: s
   ]);
   const client = getSupabaseBrowserClient();
   const { data, error } = await client.auth.getUser();
-  if (error || !data.user) throw new Error("Session expirée. Reconnectez-vous.");
+  if (error || !data.user) throw new NotAuthenticated();
   const meta = data.user.user_metadata as { display_name?: string } | undefined;
   return {
     driver: new SupabaseDriver(client, data.user.id),
@@ -79,6 +82,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setStatus("ready");
       } catch (err) {
         if (cancelled) return;
+        if (err instanceof NotAuthenticated) {
+          // Garde côté client (export statique, pas de serveur) : la sécurité
+          // des données reste assurée par les politiques RLS de PostgreSQL.
+          const here = `${window.location.pathname}${window.location.search}`;
+          router.replace(here === "/" ? "/login" : `/login?next=${encodeURIComponent(here)}`);
+          return;
+        }
         setError(err instanceof Error ? err.message : "Initialisation impossible.");
         setStatus("error");
       }
@@ -86,7 +96,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [attempt]);
+  }, [attempt, router]);
 
   const invalidate = useCallback(() => setVersion((v) => v + 1), []);
 
@@ -111,11 +121,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (!services || !driverRef.current) return;
     const { exportBackup } = await import("@/services/backup");
     const backup = await exportBackup(driverRef.current, services.userId);
-    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+    const filename = `workout-sauvegarde-${backup.exportedAt.slice(0, 10)}.json`;
+    const content = JSON.stringify(backup, null, 2);
+    const { nativeShareTextFile } = await import("@/lib/native");
+    if (await nativeShareTextFile(filename, content, "Sauvegarde WORKOUT")) return;
+    const blob = new Blob([content], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `workout-sauvegarde-${backup.exportedAt.slice(0, 10)}.json`;
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
   }, [services]);
