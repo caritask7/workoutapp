@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronLeft, ChevronRight, Coffee, Cookie, Moon, Pencil, Plus, ScanLine, Sparkles, TrendingUp, Utensils, UtensilsCrossed } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Coffee, Database, History, Cookie, Moon, Pencil, Plus, ScanLine, Sparkles, TrendingUp, Utensils, UtensilsCrossed } from "lucide-react";
 import { Button, Card, ErrorState, IconButton, LabelCaps, PageSkeleton, Pill } from "@/components/ui";
 import { CaloriesRing, MacroBars } from "@/components/nutrition/macro-summary";
-import { AddFoodSheet, GoalsSheet, MealItemSheet } from "@/components/nutrition/food-sheets";
+import { AddFoodSheet, FoodsManagerSheet, GoalsSheet, MealItemSheet } from "@/components/nutrition/food-sheets";
+import { BarsChart } from "@/components/charts/charts";
 import { useData } from "@/hooks/use-data";
 import { useToday } from "@/hooks/use-clock";
 import { addDays } from "@/lib/domain/dates";
 import { percentOf } from "@/lib/domain/nutrition";
-import { formatDateLong, formatDecimal, formatInt } from "@/lib/format";
+import { formatDateLong, formatDayMonth, formatDecimal, formatInt } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { MEAL_TYPES } from "@/services/nutrition";
 import type { MealItem, MealType, MealWithItems, NutritionGoal } from "@/types/domain";
@@ -36,6 +37,7 @@ function Nutrition({ today, date, offset, setOffset }: { today: string; date: st
   const [adding, setAdding] = useState<MealType | null>(null);
   const [editing, setEditing] = useState<MealItem | null>(null);
   const [goalsOpen, setGoalsOpen] = useState(false);
+  const [foodsOpen, setFoodsOpen] = useState(false);
 
   if (day.loading) return <PageSkeleton blocks={4} />;
   if (day.error || !day.data) return <ErrorState message={day.error ?? "Chargement impossible."} onRetry={day.reload} />;
@@ -117,6 +119,10 @@ function Nutrition({ today, date, offset, setOffset }: { today: string; date: st
           <Button size="lg" block icon={<ScanLine className="size-5" />} onClick={() => setAdding("breakfast")}>
             Ajouter un aliment
           </Button>
+          <Button variant="secondary" block icon={<Database className="size-4 text-lime" />} onClick={() => setFoodsOpen(true)}>
+            Mes aliments
+          </Button>
+          <NutritionHistory today={today} onPick={(d) => setOffset(Math.round((new Date(`${d}T00:00:00`).getTime() - new Date(`${today}T00:00:00`).getTime()) / 86_400_000))} />
         </div>
 
         <section aria-labelledby="journal-title" className="flex flex-col gap-3">
@@ -139,6 +145,7 @@ function Nutrition({ today, date, offset, setOffset }: { today: string; date: st
       {adding && <AddFoodSheet date={date} defaultMeal={adding} onClose={() => setAdding(null)} />}
       {editing && <MealItemSheet item={editing} onClose={() => setEditing(null)} />}
       {goalsOpen && <GoalsSheet goal={goal} onClose={() => setGoalsOpen(false)} />}
+      {foodsOpen && <FoodsManagerSheet onClose={() => setFoodsOpen(false)} />}
     </div>
   );
 }
@@ -229,5 +236,49 @@ function Suggestion({ goal, totals }: { goal: NutritionGoal; totals: { kcal: num
         {rest.kcal > 0 ? ` (≈ ${formatInt(rest.kcal)} kcal)` : ""}.
       </p>
     </div>
+  );
+}
+
+/** Historique des 14 derniers jours : calories par jour et moyennes. */
+function NutritionHistory({ today, onPick }: { today: string; onPick: (date: string) => void }) {
+  const from = addDays(today, -13);
+  const data = useData(async (s) => ({ days: await s.nutrition.dailyTotals(from, today), goal: await s.nutrition.getGoal(today) }), [from, today]);
+  const days = data.data?.days ?? [];
+  const series = Array.from({ length: 14 }, (_, i) => {
+    const d = addDays(from, i);
+    return { date: d, label: formatDayMonth(d), value: days.find((x) => x.date === d)?.totals.kcal ?? 0 };
+  });
+  const avg = (k: "kcal" | "proteinG") => (days.length ? days.reduce((s, d) => s + d.totals[k], 0) / days.length : 0);
+
+  return (
+    <Card>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h2 className="flex items-center gap-2 text-label-caps text-ink">
+          <History className="size-4 text-lime" aria-hidden />
+          Historique 14 jours
+        </h2>
+        {days.length > 0 && (
+          <span className="text-[12px] text-muted tabular">
+            moy. {formatInt(Math.round(avg("kcal")))} kcal · {formatInt(Math.round(avg("proteinG")))} g P
+          </span>
+        )}
+      </div>
+      {days.length ? (
+        <>
+          <BarsChart data={series} unit="kcal" ariaLabel="Calories par jour sur 14 jours" reference={data.data?.goal?.calories} referenceLabel="Objectif" height={150} />
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {days.slice(0, 7).map((d) => (
+              <li key={d.date}>
+                <button type="button" onClick={() => onPick(d.date)} className="h-8 rounded-full bg-surface-3 px-3 text-[12px] text-ink hover:bg-surface-4">
+                  {formatDayMonth(d.date)} · {formatInt(d.totals.kcal)} kcal
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <p className="text-[14px] text-muted">Aucun repas enregistré sur les 14 derniers jours.</p>
+      )}
+    </Card>
   );
 }

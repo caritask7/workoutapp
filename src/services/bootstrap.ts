@@ -1,5 +1,7 @@
 import type { Profile, Workout, WorkoutExercise, WorkoutProgram } from "@/types/domain";
 import { catalogRows } from "@/data/seed/catalog-rows";
+import referenceFoods from "@/data/seed/foods.generated.json";
+import type { Food } from "@/types/domain";
 import { PROGRAM_SEED, WORKOUT_SEEDS } from "@/data/seed/programs";
 import { DEFAULT_NUTRITION_GOAL, DEFAULT_PREFERENCES, DEMO_PROFILE } from "@/data/seed/profile";
 import { startOfWeek, toIsoDate } from "@/lib/domain/dates";
@@ -16,6 +18,9 @@ export async function ensureLocalCatalog({ driver }: ServiceContext): Promise<vo
   await driver.upsert("muscle_groups", rows.muscle_groups);
   await driver.upsert("exercises", rows.exercises);
   await driver.upsert("exercise_muscles", rows.exercise_muscles);
+  // Aliments de référence importés (vide tant qu'aucune table n'a été importée).
+  const foods = (referenceFoods as Omit<Food, "createdAt">[]).map((f) => ({ ...f, createdAt: "2026-01-01T00:00:00.000Z" }));
+  if (foods.length) await driver.upsert("foods", foods);
 }
 
 /**

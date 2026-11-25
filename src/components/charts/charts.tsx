@@ -108,7 +108,21 @@ export function TrendChart({
 }
 
 /** Barres (volume hebdomadaire, séances par semaine). */
-export function BarsChart({ data, unit, height = 160, ariaLabel }: { data: (Point & { label: string })[]; unit: string; height?: number; ariaLabel: string }) {
+export function BarsChart({
+  data,
+  unit,
+  height = 160,
+  ariaLabel,
+  reference,
+  referenceLabel,
+}: {
+  data: (Point & { label: string })[];
+  unit: string;
+  height?: number;
+  ariaLabel: string;
+  reference?: number;
+  referenceLabel?: string;
+}) {
   return (
     <div role="img" aria-label={ariaLabel} style={{ height }} className="w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -117,6 +131,14 @@ export function BarsChart({ data, unit, height = 160, ariaLabel }: { data: (Poin
           <XAxis dataKey="label" {...AXIS} interval="preserveStartEnd" tickMargin={8} />
           <YAxis {...AXIS} width={44} allowDecimals={false} tickFormatter={(v: number) => (v >= 1000 ? `${formatDecimal(v / 1000)}t` : String(v))} />
           <Tooltip content={(props) => <ChartTooltip active={props.active} payload={props.payload} unit={unit} />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
+          {reference != null && (
+            <ReferenceLine
+              y={reference}
+              stroke="#c7c6ce"
+              strokeDasharray="4 4"
+              label={{ value: referenceLabel ?? "", position: "insideTopRight", fill: "#c7c6ce", fontSize: 10, fontFamily: "var(--font-space-grotesk)" }}
+            />
+          )}
           <Bar dataKey="value" fill="#a3fa00" radius={[4, 4, 0, 0]} maxBarSize={28} isAnimationActive={false} />
         </BarChart>
       </ResponsiveContainer>

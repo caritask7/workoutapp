@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "db:seed-sql": "tsx scripts/generate-seed-sql.ts",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "foods:import": "tsx scripts/import-foods.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

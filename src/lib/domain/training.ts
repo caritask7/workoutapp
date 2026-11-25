@@ -155,3 +155,22 @@ export function round(value: number, decimals = 0): number {
   const f = 10 ** decimals;
   return Math.round(value * f) / f;
 }
+
+/**
+ * Séries validées par muscle : 1 par série pour un muscle principal,
+ * 0,5 pour un muscle secondaire (convention courante de comptage du volume).
+ */
+export function muscleSetCounts(
+  sets: Pick<WorkoutSet, "exerciseId" | "completed">[],
+  musclesByExercise: Map<string, { primaryMuscles: string[]; secondaryMuscles: string[] }>,
+): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const s of sets) {
+    if (!s.completed) continue;
+    const e = musclesByExercise.get(s.exerciseId);
+    if (!e) continue;
+    for (const m of e.primaryMuscles) out[m] = (out[m] ?? 0) + 1;
+    for (const m of e.secondaryMuscles) if (!e.primaryMuscles.includes(m)) out[m] = (out[m] ?? 0) + 0.5;
+  }
+  return out;
+}

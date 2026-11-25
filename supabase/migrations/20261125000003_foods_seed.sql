@@ -1,0 +1,1 @@
+-- Aucun aliment importé (voir scripts/import-foods.ts).

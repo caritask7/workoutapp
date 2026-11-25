@@ -412,6 +412,13 @@ export function createSessionService(ctx: ServiceContext) {
     }
   }
 
+  /** Séries validées d'un ensemble de séances (statistiques). */
+  async function completedSetsFor(sessionIds: string[]): Promise<WorkoutSet[]> {
+    if (!sessionIds.length) return [];
+    const sets = await driver.list("workout_sets", { in: { field: "sessionId", values: sessionIds } });
+    return sets.filter((s) => s.completed);
+  }
+
   async function listRecords(exerciseId?: string): Promise<PersonalRecord[]> {
     return driver.list("personal_records", {
       where: exerciseId ? { exerciseId } : undefined,
@@ -440,5 +447,6 @@ export function createSessionService(ctx: ServiceContext) {
     discardSession,
     deleteSession,
     listRecords,
+    completedSetsFor,
   };
 }

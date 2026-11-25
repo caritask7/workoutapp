@@ -353,3 +353,69 @@ export function GoalsSheet({ goal, onClose }: { goal: NutritionGoal | null; onCl
     </Sheet>
   );
 }
+
+/** Gestion de la base d'aliments : consultation, modification et suppression des aliments personnels. */
+export function FoodsManagerSheet({ onClose }: { onClose: () => void }) {
+  const toast = useToast();
+  const [term, setTerm] = useState("");
+  const [editing, setEditing] = useState<Food | "new" | null>(null);
+  const foods = useData((s) => s.nutrition.searchFoods(term, 200), [term]);
+  const remove = useMutation((s, id: string) => s.nutrition.deleteFood(id), { onSuccess: () => toast("Aliment supprimé") });
+
+  if (editing) {
+    return (
+      <Sheet open onClose={onClose} size="lg" title={editing === "new" ? "Créer un aliment" : "Modifier l'aliment"}>
+        <FoodForm
+          food={editing === "new" ? undefined : editing}
+          onCancel={() => setEditing(null)}
+          onSaved={() => {
+            toast("Aliment enregistré");
+            setEditing(null);
+          }}
+        />
+      </Sheet>
+    );
+  }
+
+  return (
+    <Sheet open onClose={onClose} size="lg" title="Mes aliments" description="Les repas déjà enregistrés conservent leurs valeurs, même si l'aliment est modifié ou supprimé.">
+      <div className="flex flex-col gap-4">
+        <label className="relative block">
+          <span className="sr-only">Rechercher un aliment</span>
+          <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-subtle" aria-hidden />
+          <Input value={term} onChange={(e) => setTerm(e.target.value)} placeholder="Rechercher" className="pl-10" />
+        </label>
+        <InlineError message={remove.error} />
+        <ul className="flex flex-col divide-y divide-line">
+          {foods.data?.map((f) => (
+            <li key={f.id} className="flex items-center gap-2 py-2.5">
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[15px] text-ink-strong">{f.name}</span>
+                <span className="block truncate text-[12px] text-muted">
+                  {SOURCE_LABEL[f.source]}
+                  {f.sourceRef ? ` · ${f.sourceRef}` : ""} · {formatInt(f.kcalPer100)} kcal / 100 {f.unit}
+                </span>
+              </span>
+              {f.ownerId ? (
+                <>
+                  <Button size="sm" variant="subtle" onClick={() => setEditing(f)}>
+                    Modifier
+                  </Button>
+                  <Button size="sm" variant="danger" aria-label={`Supprimer ${f.name}`} onClick={() => void remove.run(f.id)}>
+                    <Trash2 className="size-3.5" />
+                  </Button>
+                </>
+              ) : (
+                <span className="text-label-caps text-subtle">Référence</span>
+              )}
+            </li>
+          ))}
+          {foods.data?.length === 0 && <li className="py-6 text-center text-[14px] text-muted">Aucun aliment.</li>}
+        </ul>
+        <Button variant="secondary" block icon={<Plus className="size-4 text-lime" />} onClick={() => setEditing("new")}>
+          Créer un aliment
+        </Button>
+      </div>
+    </Sheet>
+  );
+}

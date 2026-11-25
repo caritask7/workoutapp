@@ -26,6 +26,7 @@ import { SetRow, type RowState } from "@/components/session/set-row";
 import { RestTimer } from "@/components/session/rest-timer";
 import { useData, useMutation } from "@/hooks/use-data";
 import { useNow } from "@/hooks/use-clock";
+import { useWakeLock } from "@/hooks/use-wake-lock";
 import { MUSCLE_BY_ID } from "@/data/seed/muscles";
 import { sessionElapsedSec, totalVolume } from "@/lib/domain/training";
 import { formatClock, formatDateShort, formatDecimal, formatInt } from "@/lib/format";
@@ -61,6 +62,7 @@ export function SessionScreen({ id }: { id: string }) {
   const [finishing, setFinishing] = useState(false);
   const [discarding, setDiscarding] = useState(false);
   const alerted = useRef<string | null>(null);
+  useWakeLock(state.data?.session.status === "in_progress");
 
   const act = useMutation(async (s, fn: (s: Services) => Promise<unknown>) => fn(s));
   const finish = useMutation((s) => s.sessions.finishSession(id), {
@@ -119,6 +121,7 @@ export function SessionScreen({ id }: { id: string }) {
   const nextItem = session.plan[index + 1];
   const busy = act.pending || finish.pending;
   const restTotal = item.restSec;
+  const increment = preferences?.weightIncrementKg ?? 2.5;
 
   const rowState = (s: WorkoutSet): RowState => (s.completed ? "done" : s.id === firstOpen?.id ? "current" : "upcoming");
 
@@ -299,6 +302,30 @@ export function SessionScreen({ id }: { id: string }) {
               Ajouter une série
             </Button>
           </div>
+          {firstOpen && item.trackingType === "weight_reps" && (
+            <div className="mt-2 flex items-center gap-2 rounded-2xl bg-surface-2 p-2" role="group" aria-label={`Ajuster la charge de la série ${firstOpen.setNumber}`}>
+              <Button
+                variant="subtle"
+                className="h-14 flex-1 text-[16px]"
+                disabled={busy || paused}
+                onClick={() => updateSet(firstOpen, { weightKg: Math.max(0, Math.round(((firstOpen.weightKg ?? 0) - increment) * 100) / 100) })}
+              >
+                −{formatDecimal(increment)}
+              </Button>
+              <span className="w-24 text-center">
+                <span className="block text-label-caps text-muted">Série {firstOpen.setNumber}</span>
+                <span className="font-display text-[18px] font-bold text-ink-strong tabular">{firstOpen.weightKg != null ? `${formatDecimal(firstOpen.weightKg)} kg` : "— kg"}</span>
+              </span>
+              <Button
+                variant="subtle"
+                className="h-14 flex-1 text-[16px]"
+                disabled={busy || paused}
+                onClick={() => updateSet(firstOpen, { weightKg: Math.round(((firstOpen.weightKg ?? 0) + increment) * 100) / 100 })}
+              >
+                +{formatDecimal(increment)}
+              </Button>
+            </div>
+          )}
           <InlineError message={act.error} />
         </section>
       </main>

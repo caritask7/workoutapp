@@ -2,7 +2,7 @@
 
 Application personnelle de musculation : programme de 12 semaines (Full Body A/B/C), séance active, nutrition, progression.
 
-> État : **phase 3 (intégration des écrans) terminée**. Plan complet : [`docs/AUDIT.md`](docs/AUDIT.md).
+> État : **phase 4 (finitions fonctionnelles) terminée**. Plan complet : [`docs/AUDIT.md`](docs/AUDIT.md).
 
 ## Écrans
 
@@ -46,6 +46,27 @@ Chaque table utilisateur est protégée par RLS. Les photos de progression sont 
 | `npm run lint` | ESLint |
 | `npm test` | Vitest (calculs métier + services sur IndexedDB) |
 | `npm run db:seed-sql` | Régénère la migration du catalogue depuis `src/data/seed` |
+| `npm run foods:import -- fichier.csv` | Importe une table d'aliments de référence (ex. CIQUAL) |
+
+## Base d'aliments
+
+L'application n'invente aucune valeur nutritionnelle. La base démarre vide : chaque aliment est saisi depuis son étiquette, avec un contrôle de cohérence 4/4/9 kcal. Pour charger une table de référence, comme CIQUAL (ANSES) exportée en CSV :
+
+```bash
+npm run foods:import -- table.csv
+```
+
+- **Colonnes :** `nom;kcal;proteines;glucides;lipides`, plus `fibres`, `ref`, `source` et `unite` en option.
+- **Valeurs :** les mentions « traces » et « < x » sont ramenées à 0 et comptées ; les lignes incomplètes sont rejetées.
+- **Fichiers générés :** `src/data/seed/foods.generated.json`, chargé en mode démo, et `supabase/migrations/20261125000003_foods_seed.sql`.
+
+## Sauvegarde
+
+Profil → Sauvegarde : export JSON de toutes les données, hors photos et catalogue partagé. En mode démo, l'import remplace les données du navigateur ; le fichier est validé avant toute suppression.
+
+## Installation sur mobile
+
+L'application est installable (manifeste PWA) : ouvrez-la dans le navigateur du téléphone, puis « Ajouter à l'écran d'accueil ». Pendant une séance, l'écran reste allumé si le navigateur le permet (Screen Wake Lock).
 
 ## Architecture
 

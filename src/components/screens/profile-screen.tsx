@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Database, LogOut, RotateCcw, Save } from "lucide-react";
+import { useRef, useState } from "react";
+import { Database, Download, LogOut, RotateCcw, Save, Upload } from "lucide-react";
 import { Button, Card, CardHeader, ConfirmSheet, ErrorState, Field, InlineError, Input, NumberInput, PageSkeleton, Select, Switch, Textarea, useToast } from "@/components/ui";
 import { PageHeader } from "@/components/layout/page-header";
 import { useData, useMutation } from "@/hooks/use-data";
@@ -36,7 +36,22 @@ export function ProfileScreen() {
 
 function ProfileForm({ profile, program }: { profile: Profile; program: WorkoutProgram | null }) {
   const toast = useToast();
-  const { mode, email, signOut, resetDemo } = useDataContext();
+  const { mode, email, signOut, resetDemo, exportData, importData } = useDataContext();
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [dataError, setDataError] = useState<string | null>(null);
+  const [dataBusy, setDataBusy] = useState(false);
+  const runData = async (fn: () => Promise<void>) => {
+    setDataBusy(true);
+    setDataError(null);
+    try {
+      await fn();
+    } catch (err) {
+      setDataError(err instanceof Error ? err.message : "Opération impossible.");
+    } finally {
+      setDataBusy(false);
+    }
+  };
   const [form, setForm] = useState<ProfileInput>({
     displayName: profile.displayName,
     age: profile.age,
@@ -182,6 +197,17 @@ function ProfileForm({ profile, program }: { profile: Profile; program: WorkoutP
               </Select>
             )}
           </Field>
+          <Field label="Incrément de charge (boutons ± en séance)" className="mt-3">
+            {(p) => (
+              <Select value={form.preferences.weightIncrementKg} onChange={(e) => setPref("weightIncrementKg", Number(e.target.value))} {...p}>
+                {[0.5, 1, 1.25, 2, 2.5, 5].map((v) => (
+                  <option key={v} value={v}>
+                    {String(v).replace(".", ",")} kg
+                  </option>
+                ))}
+              </Select>
+            )}
+          </Field>
           <div className="mt-2 divide-y divide-line">
             <Switch checked={form.preferences.autoStartRestTimer} onChange={(v) => setPref("autoStartRestTimer", v)} label="Repos automatique" description="Lance le minuteur à chaque série validée" />
             <Switch checked={form.preferences.restTimerSound} onChange={(v) => setPref("restTimerSound", v)} label="Signal sonore" description="Bip à la fin du repos" />
@@ -213,6 +239,37 @@ function ProfileForm({ profile, program }: { profile: Profile; program: WorkoutP
         )}
       </Card>
 
+      <Card>
+        <CardHeader icon={<Download />} title="Sauvegarde" />
+        <p className="text-[14px] text-muted">
+          Exportez vos séances, mesures, repas, aliments et entraînements dans un fichier JSON (photos non incluses).
+          {mode === "demo" && " En mode démo, c'est le seul moyen de conserver vos données hors de ce navigateur."}
+        </p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Button variant="secondary" icon={<Download className="size-4" />} loading={dataBusy && !importFile} onClick={() => void runData(exportData)}>
+            Exporter mes données
+          </Button>
+          {mode === "demo" && (
+            <>
+              <Button variant="secondary" icon={<Upload className="size-4" />} onClick={() => fileInput.current?.click()}>
+                Importer une sauvegarde
+              </Button>
+              <input
+                ref={fileInput}
+                type="file"
+                accept="application/json,.json"
+                hidden
+                onChange={(e) => {
+                  setImportFile(e.target.files?.[0] ?? null);
+                  e.target.value = "";
+                }}
+              />
+            </>
+          )}
+        </div>
+        <InlineError message={dataError} />
+      </Card>
+
       <div className="fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom))] z-30 border-t border-line glass-bar px-4 py-3 lg:static lg:border-0 lg:bg-transparent lg:p-0">
         <div className="mx-auto max-w-6xl">
           <Button size="lg" block loading={save.pending} onClick={submit} icon={<Save className="size-5" />}>
@@ -221,6 +278,19 @@ function ProfileForm({ profile, program }: { profile: Profile; program: WorkoutP
         </div>
       </div>
 
+      <ConfirmSheet
+        open={Boolean(importFile)}
+        onClose={() => setImportFile(null)}
+        onConfirm={() => {
+          const f = importFile;
+          setImportFile(null);
+          if (f) void runData(() => importData(f));
+        }}
+        danger
+        title="Remplacer toutes les données ?"
+        description={`Les données actuelles de ce navigateur seront remplacées par celles de « ${importFile?.name ?? ""} ». Le fichier est vérifié avant toute suppression.`}
+        confirmLabel="Importer"
+      />
       <ConfirmSheet
         open={confirmReset}
         onClose={() => setConfirmReset(false)}

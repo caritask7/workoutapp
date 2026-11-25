@@ -167,3 +167,25 @@ describe("générateur de séance", () => {
     expect(d.setsByMuscle.quads).toBe(4);
   });
 });
+
+import { muscleSetCounts } from "../training";
+
+describe("volume par muscle", () => {
+  it("1 série par muscle principal, 0,5 par secondaire, séries validées uniquement", () => {
+    const map = new Map([
+      ["bench_press", { primaryMuscles: ["chest"], secondaryMuscles: ["triceps", "shoulders"] }],
+      ["dip", { primaryMuscles: ["triceps", "chest"], secondaryMuscles: ["shoulders"] }],
+    ]);
+    const counts = muscleSetCounts(
+      [
+        { exerciseId: "bench_press", completed: true },
+        { exerciseId: "bench_press", completed: true },
+        { exerciseId: "dip", completed: true },
+        { exerciseId: "dip", completed: false },
+        { exerciseId: "unknown", completed: true },
+      ],
+      map,
+    );
+    expect(counts).toEqual({ chest: 3, triceps: 2, shoulders: 1.5 });
+  });
+});

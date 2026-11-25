@@ -39,6 +39,7 @@ import {
 import { PageHeader } from "@/components/layout/page-header";
 import { BarsChart, TrendChart } from "@/components/charts/charts";
 import { MeasurementSheet } from "@/components/body/measurement-sheet";
+import { MuscleHeatmap } from "@/components/body/muscle-heatmap";
 import { useData, useMutation } from "@/hooks/use-data";
 import { useToday } from "@/hooks/use-clock";
 import { addDays, diffDays, isoDateOf, startOfWeek } from "@/lib/domain/dates";
@@ -122,7 +123,10 @@ function Progress({ today }: { today: string }) {
         <RecordsGrid records={records} names={exerciseNames} />
       </section>
 
-      <LoadProgression sessions={sessions} names={exerciseNames} from={from} />
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <LoadProgression sessions={sessions} names={exerciseNames} from={from} />
+        <MuscleHeatmap from={from} weeks={Math.max(1, PERIOD_DAYS[period] / 7)} />
+      </div>
 
       <section>
         <SectionTitle aside={`Sur ${PERIOD_DAYS[period]} jours`}>Mensurations</SectionTitle>
