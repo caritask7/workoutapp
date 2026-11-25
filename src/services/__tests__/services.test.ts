@@ -59,10 +59,13 @@ describe("séance active", () => {
 
     let sets = await services.sessions.listSets(session.id);
     expect(sets).toHaveLength(3 + 3 + 3 + 2 + 2 + 2);
+    expect(sets[0].weightKg).toBeNull();
     expect(sets.filter((s) => s.planIndex === 0).every((s) => s.reps === 10)).toBe(true);
 
     const squatSets = sets.filter((s) => s.planIndex === 0);
     await services.sessions.updateSet(squatSets[0].id, { weightKg: 60, reps: 10, completed: true });
+    // La charge validée est reportée sur les séries suivantes vides.
+    expect((await services.sessions.listSets(session.id)).filter((x) => x.planIndex === 0).map((x) => x.weightKg)).toEqual([60, 60, 60]);
     await services.sessions.updateSet(squatSets[1].id, { weightKg: 62.5, reps: 8, completed: true });
 
     const paused = await services.sessions.pauseSession(session.id);

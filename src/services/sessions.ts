@@ -206,6 +206,21 @@ export function createSessionService(ctx: ServiceContext) {
       next.completedAt = entry.completed ? nowIso() : null;
     }
     await driver.upsert("workout_sets", next);
+
+    // Validation : la charge / durée réalisée pré-remplit les séries suivantes encore vides.
+    if (entry.completed && !set.completed) {
+      const following = (await listSets(set.sessionId)).filter(
+        (x) => x.planIndex === set.planIndex && x.setNumber > set.setNumber && !x.completed,
+      );
+      const filled = following
+        .filter((x) => (x.weightKg == null && next.weightKg != null) || (x.durationSec == null && next.durationSec != null))
+        .map((x) => ({
+          ...x,
+          weightKg: x.weightKg ?? next.weightKg,
+          durationSec: x.durationSec ?? next.durationSec,
+        }));
+      await driver.upsert("workout_sets", filled);
+    }
     return next;
   }
 

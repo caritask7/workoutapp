@@ -1,15 +1,13 @@
-import { AppShell } from "@/components/layout/app-shell";
 import { ToastProvider } from "@/components/ui";
 import { DataGate } from "@/providers/data-gate";
 import { DataProvider } from "@/providers/data-provider";
 
+/** Providers partagés : restent montés entre l'app et le mode entraînement. */
 export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
     <DataProvider>
       <ToastProvider>
-        <DataGate>
-          <AppShell>{children}</AppShell>
-        </DataGate>
+        <DataGate>{children}</DataGate>
       </ToastProvider>
     </DataProvider>
   );

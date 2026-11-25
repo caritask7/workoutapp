@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { Logo } from "@/components/ui";
 import { programWeek } from "@/lib/domain/training";
@@ -11,27 +11,35 @@ import { useData } from "@/hooks/use-data";
 import { useDataContext } from "@/providers/data-provider";
 import { NAV_ITEMS, currentSection, isActive } from "./nav-items";
 
-/** Écrans plein écran, sans navigation (séance active). */
-const FOCUS_ROUTES = [/^\/session\/[^/]+$/];
-
 export function AppShell({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-  const focus = FOCUS_ROUTES.some((r) => r.test(pathname));
-
-  if (focus) return <div className="mx-auto min-h-dvh w-full max-w-3xl">{children}</div>;
-
   return (
     <div className="min-h-dvh lg:flex">
-      <SideNav pathname={pathname} />
+      <Suspense fallback={<SideNav pathname={null} />}>
+        <SideNavWithPath />
+      </Suspense>
       <div className="min-w-0 flex-1">
-        <TopBar pathname={pathname} />
+        <TopBar />
         <main id="contenu" className="mx-auto w-full max-w-6xl px-4 pt-4 pb-[calc(96px+env(safe-area-inset-bottom))] md:px-8 lg:pb-12">
           {children}
         </main>
       </div>
-      <BottomNav pathname={pathname} />
+      <Suspense fallback={<BottomNav pathname={null} />}>
+        <BottomNavWithPath />
+      </Suspense>
     </div>
   );
+}
+
+/* La lecture de l'URL est isolée sous <Suspense> (Cache Components) : la
+   coquille statique affiche la navigation sans onglet actif. */
+function SideNavWithPath() {
+  return <SideNav pathname={usePathname()} />;
+}
+function BottomNavWithPath() {
+  return <BottomNav pathname={usePathname()} />;
+}
+function SectionLabel() {
+  return <>{currentSection(usePathname())?.label ?? ""}</>;
 }
 
 function ProgramWeekBadge() {
@@ -68,8 +76,7 @@ function Avatar() {
   );
 }
 
-function TopBar({ pathname }: { pathname: string }) {
-  const section = currentSection(pathname);
+function TopBar() {
   const { mode } = useDataContext();
   return (
     <header className="sticky top-0 z-30 border-b border-line/60 glass-bar">
@@ -77,7 +84,11 @@ function TopBar({ pathname }: { pathname: string }) {
         <Link href="/" className="flex min-w-0 items-center gap-3 lg:hidden" aria-label="Accueil WORKOUT">
           <Logo />
         </Link>
-        <p className="hidden text-label-caps text-muted lg:block">{section?.label ?? ""}</p>
+        <p className="hidden text-label-caps text-muted lg:block">
+          <Suspense fallback={null}>
+            <SectionLabel />
+          </Suspense>
+        </p>
         <div className="flex items-center gap-2.5">
           {mode === "demo" && (
             <span className="hidden h-7 items-center rounded-full border border-line-strong px-2.5 text-label-caps text-subtle sm:inline-flex" title="Données enregistrées dans ce navigateur uniquement">
@@ -92,12 +103,12 @@ function TopBar({ pathname }: { pathname: string }) {
   );
 }
 
-function BottomNav({ pathname }: { pathname: string }) {
+function BottomNav({ pathname }: { pathname: string | null }) {
   return (
     <nav aria-label="Navigation principale" className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-line glass-bar lg:hidden">
       <ul className="mx-auto grid h-[72px] max-w-xl grid-cols-5">
         {NAV_ITEMS.map((item) => {
-          const active = isActive(item, pathname);
+          const active = pathname !== null && isActive(item, pathname);
           const Icon = item.icon;
           return (
             <li key={item.href}>
@@ -121,7 +132,7 @@ function BottomNav({ pathname }: { pathname: string }) {
   );
 }
 
-function SideNav({ pathname }: { pathname: string }) {
+function SideNav({ pathname }: { pathname: string | null }) {
   return (
     <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-line bg-surface-lowest/60 px-4 py-6 lg:flex">
       <Link href="/" className="mb-10 px-2" aria-label="Accueil WORKOUT">
@@ -130,7 +141,7 @@ function SideNav({ pathname }: { pathname: string }) {
       <nav aria-label="Navigation principale">
         <ul className="flex flex-col gap-1">
           {NAV_ITEMS.map((item) => {
-            const active = isActive(item, pathname);
+            const active = pathname !== null && isActive(item, pathname);
             const Icon = item.icon;
             return (
               <li key={item.href}>
