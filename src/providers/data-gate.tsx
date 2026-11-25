@@ -1,23 +1,16 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { ErrorState, Logo } from "@/components/ui";
+import { ErrorState } from "@/components/ui";
 import { useDataContext } from "./data-provider";
 
-/** Bloque le rendu tant que la couche de données n'est pas initialisée. */
+/**
+ * Affiche l'erreur d'initialisation de la couche de données. Pendant le
+ * chargement, les écrans sont rendus (coquille statique / navigation
+ * instantanée) et affichent leurs propres squelettes via `useData`.
+ */
 export function DataGate({ children }: { children: ReactNode }) {
   const { status, error, retry } = useDataContext();
-
-  if (status === "loading") {
-    return (
-      <div role="status" className="grid min-h-dvh place-items-center">
-        <div className="flex flex-col items-center gap-4">
-          <Logo className="animate-pulse" />
-          <span className="text-label-caps text-subtle">Chargement des données…</span>
-        </div>
-      </div>
-    );
-  }
 
   if (status === "error") {
     return (

@@ -7,7 +7,7 @@ export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "subt
 export type ButtonSize = "lg" | "md" | "sm";
 
 const base =
-  "inline-flex items-center justify-center gap-2 select-none whitespace-nowrap font-display font-bold uppercase tracking-[0.04em] transition-[background-color,border-color,color,transform,box-shadow] duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45";
+  "inline-flex items-center justify-center gap-2 select-none text-center font-display [&_svg]:shrink-0 font-bold uppercase tracking-[0.04em] transition-[background-color,border-color,color,transform,box-shadow] duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45";
 
 const variants: Record<ButtonVariant, string> = {
   primary: "bg-lime text-on-lime hover:bg-lime-press active:bg-lime-press glow-lime-strong",
@@ -19,9 +19,9 @@ const variants: Record<ButtonVariant, string> = {
 };
 
 const sizes: Record<ButtonSize, string> = {
-  lg: "h-[52px] rounded-[14px] px-6 text-[15px]",
-  md: "h-11 rounded-xl px-4 text-[13px]",
-  sm: "h-9 rounded-full px-3.5 text-[11px] tracking-[0.06em]",
+  lg: "min-h-[52px] rounded-[14px] px-5 py-2 text-[14px] leading-tight sm:text-[15px]",
+  md: "h-11 whitespace-nowrap rounded-xl px-4 text-[13px]",
+  sm: "h-9 whitespace-nowrap rounded-full px-3.5 text-[11px] tracking-[0.06em]",
 };
 
 interface StyleProps {

@@ -1,5 +1,5 @@
-import { PendingScreen } from "@/components/layout/pending-screen";
+import { WorkoutsScreen } from "@/components/screens/workouts-screen";
 
 export default function Page() {
-  return <PendingScreen title="Entraînements" />;
+  return <WorkoutsScreen />;
 }

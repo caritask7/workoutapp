@@ -133,3 +133,37 @@ describe("corps", () => {
     });
   });
 });
+
+import { sessionDensity, suggestWorkout } from "../builder";
+import { catalogRows } from "@/data/seed/catalog-rows";
+import { composeExercise } from "@/services/catalog";
+
+describe("générateur de séance", () => {
+  const rows = catalogRows();
+  const catalog = rows.exercises.map((e) => composeExercise(e, rows.exercise_muscles));
+  const byId = new Map(catalog.map((e) => [e.id, e]));
+
+  it("privilégie les mouvements de base et ne double pas un muscle couvert", () => {
+    const draft = suggestWorkout(["quads", "chest", "triceps", "biceps"], catalog);
+    expect(draft.map((d) => d.exerciseId)).toEqual(["squat", "bench_press", "dip", "biceps_curl"]);
+    expect(draft.map((d) => d.sets)).toEqual([3, 3, 2, 2]);
+  });
+  it("gainage en durée et en fin de séance", () => {
+    const draft = suggestWorkout(["abs", "lats"], catalog);
+    expect(draft.at(-1)?.exerciseId).toBe("crunch");
+    expect(suggestWorkout([], catalog)).toEqual([]);
+  });
+  it("densité et ratio push/pull", () => {
+    const d = sessionDensity(
+      [
+        { exerciseId: "bench_press", sets: 3 },
+        { exerciseId: "lat_pulldown", sets: 3 },
+        { exerciseId: "lateral_raise", sets: 2 },
+        { exerciseId: "squat", sets: 4 },
+      ],
+      byId,
+    );
+    expect(d).toMatchObject({ totalSets: 12, zone: "target", pushPct: 63, pullPct: 37 });
+    expect(d.setsByMuscle.quads).toBe(4);
+  });
+});

@@ -1,5 +1,5 @@
-import { PendingScreen } from "@/components/layout/pending-screen";
+import { DashboardScreen } from "@/components/screens/dashboard-screen";
 
 export default function Page() {
-  return <PendingScreen title="Tableau de bord" />;
+  return <DashboardScreen />;
 }

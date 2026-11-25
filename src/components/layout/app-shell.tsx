@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { Logo } from "@/components/ui";
 import { programWeek } from "@/lib/domain/training";
-import { toIsoDate } from "@/lib/domain/dates";
+import { useToday } from "@/hooks/use-clock";
 import { useData } from "@/hooks/use-data";
 import { useDataContext } from "@/providers/data-provider";
 import { NAV_ITEMS, currentSection, isActive } from "./nav-items";
@@ -36,8 +36,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 function ProgramWeekBadge() {
   const { data: program } = useData((s) => s.workouts.getActiveProgram());
-  if (!program) return null;
-  const week = programWeek(program.startDate, toIsoDate(), program.durationWeeks);
+  const today = useToday();
+  if (!program || !today) return null;
+  const week = programWeek(program.startDate, today, program.durationWeeks);
   return (
     <span
       className="inline-flex h-7 items-center rounded-full bg-lime/12 px-2.5 font-display text-[11px] font-bold tracking-[0.06em] text-lime tabular"

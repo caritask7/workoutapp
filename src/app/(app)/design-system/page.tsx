@@ -29,6 +29,7 @@ import {
   useToast,
 } from "@/components/ui";
 import { useData } from "@/hooks/use-data";
+import { BodyMap } from "@/components/body/body-map";
 import { MUSCLE_BY_ID } from "@/data/seed/muscles";
 import { formatTarget } from "@/lib/domain/training";
 
@@ -179,6 +180,18 @@ export default function DesignSystemPage() {
         <p className="mt-3 text-[13px] text-subtle">
           Catalogue : {exercises.data ? `${exercises.data.length} exercices` : "…"}
         </p>
+      </section>
+
+      <section>
+        <SectionTitle>Anatomie</SectionTitle>
+        <div className="grid grid-cols-2 gap-4">
+          <Card padding="md">
+            <BodyMap view="front" intensity={{ chest: 3, shoulders: 3, quads: 2, abs: 1, biceps: 3 }} labels={[{ muscle: "chest", text: "Pecs" }, { muscle: "shoulders", text: "Épaules" }]} className="max-w-[220px]" />
+          </Card>
+          <Card padding="md">
+            <BodyMap view="back" intensity={{ lats: 3, traps: 2, glutes: 3, hamstrings: 1, triceps: 2, upper_back: 1, lower_back: 2, calves: 3 }} className="max-w-[220px]" />
+          </Card>
+        </div>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">
