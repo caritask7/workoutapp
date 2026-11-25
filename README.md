@@ -2,7 +2,24 @@
 
 Application personnelle de musculation : programme de 12 semaines (Full Body A/B/C), séance active, nutrition, progression.
 
-> État : **phase 2 (fondations) terminée**. Les écrans sont intégrés en phase 3. Plan complet : [`docs/AUDIT.md`](docs/AUDIT.md).
+> État : **phase 3 (intégration des écrans) terminée**. Plan complet : [`docs/AUDIT.md`](docs/AUDIT.md).
+
+## Écrans
+
+| Route | Écran |
+|---|---|
+| `/` | Tableau de bord : poids cible, semaine, prochaine séance, dernier record, nutrition |
+| `/workouts` | Programme 12 semaines, séances de la semaine, entraînements personnalisés, tonnage |
+| `/workouts/muscles` | Ciblage anatomique (SVG face / dos) → séance proposée |
+| `/workouts/new`, `/workouts/[id]`, `/workouts/[id]/edit` | Création, détail, modification d'un entraînement |
+| `/session/[id]` | Mode entraînement : séries, repos automatique, pause / reprise |
+| `/session/[id]/summary` | Récapitulatif de séance et records battus |
+| `/exercises/[id]` | Fiche exercice : exécution, muscles, consignes, historique des charges |
+| `/progress`, `/progress/history` | Poids, volume, records, charges, mensurations, photos, historique |
+| `/nutrition` | Journal des repas, macros, aliments, objectifs |
+| `/profile` | Profil, jours d'entraînement, préférences, données |
+| `/login`, `/signup` | Authentification (mode Supabase uniquement) |
+| `/design-system` | Référence des composants (outil de développement) |
 
 ## Démarrage
 

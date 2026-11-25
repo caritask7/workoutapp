@@ -54,7 +54,7 @@ export function WorkoutDetailScreen({ id }: { id: string }) {
       </Link>
       <PageHeader eyebrow={w.isCustom ? "Entraînement personnalisé" : "Programme"} title={w.name.toUpperCase()} subtitle={w.focus} />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="flex flex-col gap-5">
           <dl className="grid grid-cols-3 divide-x divide-line rounded-card border border-line/70 bg-surface py-4 text-center">
             {[

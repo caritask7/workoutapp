@@ -62,7 +62,7 @@ export function MuscleSelectorScreen() {
         subtitle="Sélectionnez les groupes musculaires prioritaires : la séance proposée et son volume s'ajustent en direct."
       />
 
-      <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="flex flex-col gap-4">
           <SegmentedControl
             label="Vue anatomique"
